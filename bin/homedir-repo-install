@@ -14,7 +14,7 @@ false && { # one-time bootstrap code
    git init --bare "$local_repo_dir"
    hgit config --local status.showUntrackedFiles no
    # hgit() same as above, but with internal " and $ escaped
-   echo "hgit() { git --git-dir=\"$local_repo_dir/\" --work-tree=\"$HOME\" \"\$@\" ; }" >> $HOME/.bashrc
+   echo "hgit() { git --git-dir=\"\$HOME/.git-homedir/\" --work-tree=\"\$HOME\" \"\$@\" ; }" >> $HOME/.bashrc
    exit 0
    # hgit add files/dirs
    # hgit commit -m "first adds"
