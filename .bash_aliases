@@ -8,3 +8,6 @@ fi
 if [ -d ~/bin ]; then
   PATH=$PATH:~/bin
 fi
+
+# one way to map capslock key to ctrl
+setxkbmap -option ctrl:nocaps
