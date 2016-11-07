@@ -8,15 +8,22 @@ die() { { test -n "$@" && echo "$@"; exit 1; } >&2 ; }  # http://stackoverflow.c
 dotfiles_repo_uri="https://github.com/fwmechanic/homedir.git"
 local_repo_dir="$HOME/.git-homedir"
 hgit() { git --git-dir="$local_repo_dir/" --work-tree="$HOME" "$@" ; }
+[ "$(command -v git)" ] || die "git not installed"
 
 false && { # one-time bootstrap code
    git init --bare "$local_repo_dir"
    hgit config --local status.showUntrackedFiles no
+   # hgit() same as above, but with internal " and $ escaped
    echo "hgit() { git --git-dir=\"$local_repo_dir/\" --work-tree=\"$HOME\" \"\$@\" ; }" >> $HOME/.bashrc
    exit 0
+   # hgit add files/dirs
+   # hgit commit -m "first adds"
+   # on github, create new repo 'homedir'
+   hgit remote add origin https://github.com/fwmechanic/homedir.git
+   hgit remote -v  # for confirmation
+   hgit push origin master
    }
 
-[ "$(command -v git)" ] || die "git not installed"
 git clone --bare "$dotfiles_repo_uri" "$local_repo_dir"
 # hgit: "homedir-git"
 backup_dir=".config-backup/"
