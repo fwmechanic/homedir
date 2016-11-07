@@ -1,0 +1,33 @@
+#!/bin/bash -ex
+
+# from https://news.ycombinator.com/item?id=11071754
+# and  https://developer.atlassian.com/blog/2016/02/best-way-to-store-dotfiles-git-bare-repo/
+
+die() { { test -n "$@" && echo "$@"; exit 1; } >&2 ; }  # http://stackoverflow.com/a/7869048
+
+dotfiles_repo_uri="https://github.com/fwmechanic/homedir.git"
+local_repo_dir="$HOME/.git-homedir"
+hgit() { git --git-dir="$local_repo_dir/" --work-tree="$HOME" "$@" ; }
+
+false && { # one-time bootstrap code
+   git init --bare "$local_repo_dir"
+   hgit config --local status.showUntrackedFiles no
+   echo "hgit() { git --git-dir=\"$local_repo_dir/\" --work-tree=\"$HOME\" \"\$@\" ; }" >> $HOME/.bashrc
+   exit 0
+   }
+
+[ "$(command -v git)" ] || die "git not installed"
+git clone --bare "$dotfiles_repo_uri" "$local_repo_dir"
+# hgit: "homedir-git"
+backup_dir=".config-backup/"
+mkdir -p "$backup_dir"
+hgit checkout || {
+   echo "Backing up colliding files"
+   hgit checkout 2>&1 | perl -ne 'print $1 if /^\s+(\S.*)$/' | xargs -I{} mv {} "$backup_dir"{}
+   find $backup_dir -type f -print
+   echo "retrying checkout"
+   }
+hgit checkout || die "Backup of colliding files was unsuccessful"
+hgit config --local status.showUntrackedFiles no
+hgit config --local user.name "$USER"
+hgit config --local user.email "$USER@$(hostname)"
