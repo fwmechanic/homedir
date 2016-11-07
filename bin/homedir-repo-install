@@ -19,22 +19,22 @@ false && { # one-time bootstrap code
    # hgit add files/dirs
    # hgit commit -m "first adds"
    # on github, create new repo 'homedir'
-   hgit remote add origin https://github.com/fwmechanic/homedir.git
+   hgit remote add origin "$dotfiles_repo_uri"
    hgit remote -v  # for confirmation
    hgit push origin master
    }
 
 git clone --bare "$dotfiles_repo_uri" "$local_repo_dir"
 # hgit: "homedir-git"
-backup_dir=".config-backup/"
-mkdir -p "$backup_dir"
 hgit checkout || {
-   echo "Backing up colliding files"
-   hgit checkout 2>&1 | perl -ne 'print $1 if /^\s+(\S.*)$/' | xargs -I{} mv {} "$backup_dir"{}
-   find $backup_dir -type f -print
+   echo "moving-aside colliding files"
+   bak_sfx0=".hgit.co@"
+   bak_suffix="$bak_sfx0$(date +'%y%m%dT%H%M%s')"
+   hgit checkout 2>&1 | perl -ne 'print $1 if /^\s+(\S.*)$/' | xargs -I{} mv {} {}"$bak_suffix"
+   find . -type f -name '*'"$bak_sfx0"'*' -print
    echo "retrying checkout"
    }
-hgit checkout || die "Backup of colliding files was unsuccessful"
+hgit checkout || die "move-aside of colliding files was unsuccessful"
 hgit config --local status.showUntrackedFiles no
 hgit config --local user.name "$USER"
 hgit config --local user.email "$USER@$(hostname)"
