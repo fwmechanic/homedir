@@ -38,3 +38,4 @@ hgit checkout || die "Backup of colliding files was unsuccessful"
 hgit config --local status.showUntrackedFiles no
 hgit config --local user.name "$USER"
 hgit config --local user.email "$USER@$(hostname)"
+hgit config --local push.default matching
