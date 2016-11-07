@@ -29,7 +29,7 @@ git clone --bare "$dotfiles_repo_uri" "$local_repo_dir"
 hgit checkout || {
    echo "moving-aside colliding files"
    bak_sfx0=".hgit.co@"
-   bak_suffix="$bak_sfx0$(date +'%y%m%dT%H%M%s')"
+   bak_suffix="$bak_sfx0$(date +'%y%m%dT%H%M%S')"
    hgit checkout 2>&1 | perl -ne 'print $1 if /^\s+(\S.*)$/' | xargs -I{} mv {} {}"$bak_suffix"
    find . -type f -name '*'"$bak_sfx0"'*' -print
    echo "retrying checkout"
