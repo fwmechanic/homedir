@@ -23,3 +23,7 @@ alias x="exit"
 up() { if test "$#" = "1" ; then s=$( printf "%$1s" ); s=${s// /..\/}; cd $s ; else cd .. ; fi; }
 
 pathperm() { namei -l "$@" ; }  # http://serverfault.com/a/639215
+
+duh() { du --max-depth=1 -h             . | sort -r -h | head -${1-11} ; }
+duk() { du --max-depth=1                . | sort -r -n | head -${1-11} ; }
+dum() { du --max-depth=1 --block-size=M . | sort -r -n | head -${1-11} | grep -v "^1M" ; }
