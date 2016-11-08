@@ -20,9 +20,9 @@ hgit() { git --git-dir="$HOME/.git-homedir/" --work-tree="$HOME" "$@" ; }
 alias x="exit"
 
 # https://news.ycombinator.com/item?id=6310925
-up() { if test "$#" = "1" ; then s=$( printf "%$1s" ); s=${s// /..\/}; cd $s ; else cd .. ; fi; }
+up() { if test "$#" = "1" ; then s=$( printf "%$1s" ); s=${s// /..\/}; cd $s ; else cd .. ; fi ; }
 
-pathperm() { namei -l "$@" ; }  # http://serverfault.com/a/639215
+pathperm() { if [ "$#" -ge "1" ] ; then namei -l "$@" ; fi ; }  # http://serverfault.com/a/639215
 
 duh() { du -x --max-depth=1 --human-readable . | sort -r -h | head -${1-11} ; }
 duk() { du -x --max-depth=1 --block-size=K   . | sort -r -n | head -${1-11} | grep -v "^1K" ; }
