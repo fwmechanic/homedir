@@ -55,3 +55,15 @@ dum() { du -x --max-depth=1 --block-size=M   "$@" | sort -r -n | head -11 | grep
 
 cls() { clear ; }
 r()   { reset ; }
+
+# mystery one-liner from https://news.ycombinator.com/item?id=13513171
+# dpkg -l 'linux-' | sed '/^ii/!d;/'"$(uname -r | sed "s/\(.\)-\([^0-9]\+\)/\1/")"'/d;s/^[^ ]* [^ ]* \([^ ]\)./\1/;/[0-9]/!d' | xargs -p sudo apt-get -y purge
+# my corrected version:
+noncurrent_kernel_pkgs() { dpkg -l 'linux-*-[0-9]*' | sed '/^ii/!d;/'"$(uname -r | sed "s/\(.\)-\([^0-9]\+\)/\1/")"'/d;s/^ii *\([^ ][^ ]*\)[^ ]*.*/\1/' ; }
+# corrections:
+# - $(dpkg -l 'linux-') returns nothing
+# - $(dpkg -l 'linux-*[0-9]*') moves 'pkgnm must contain a number' rule (last sed cmd in orig: '/[0-9]/!d') forward
+# - pkgnm isolation/extraction was broken (did dpkg output change?)
+# lessons:
+# - wow, you can chain sed commands!  (And each operates on the buffer content as modified by preceding cmds)
+# - sed BRE does NOT support match quantifiers other than '*' (specifically, '+' and '-' are unsupported)
