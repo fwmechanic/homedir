@@ -10,6 +10,8 @@
 
 [ "$(command -v setxkbmap)" ] && setxkbmap -option ctrl:nocaps  # one way to map capslock key to ctrl
 
+ulimit -c unlimited  # any-sized core files created
+
 ###############################################################################
 
 # aliases/functions
