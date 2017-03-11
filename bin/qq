@@ -5,6 +5,16 @@ die() { printf %s "${@+$@$'\n'}" 1>&2 ; exit 1 ; }
 # search for ebooks files by 'filename contains string [and string[...]]'
 # using find, and then transforms the output into Windows absolute path
 # and format suitable for copy-pasting from PuTTY window to CMD shell etc.
+#
+# the next-most-needed feature of qq.bat is that when string is all
+# uppercase, it is treated as a string that can only match a whole word
+# (ignoring case); NAME would cause a search clause -inameperlregex
+# '\bname\b'.  Unfortunately no version of find comes close to supporting
+# this; there are -regex 'pattern' options, but none of the supported regex
+# engines seem to support the word-boundary concept.  Also, all of the regex
+# searches search the entire candidate filename (INCLUDING path component).
+# So AFAICT, this feature cannot be straightforwardly supported using find
+# alone; I guess it's time to switch to python and os.walk?
 
 searchtreeroot="/mnt/smb/pri/data/public/ebooks"
 searchtreerootWindows='p:/ebooks'
