@@ -1,0 +1,24 @@
+#!/bin/bash +x
+die() { printf %s "${@+$@$'\n'}" 1>&2 ; exit 1 ; }
+
+# tiny little script that does what qq.bat string [string [string [...]]] does:
+# search for ebooks files by 'filename contains string [and string[...]]'
+# using find, and then transforms the output into Windows absolute path
+# and format suitable for copy-pasting from PuTTY window to CMD shell etc.
+
+searchtreeroot="/mnt/smb/pri/data/public/ebooks"
+searchtreerootWindows='p:/ebooks'
+
+tail=""
+# ; set -x
+for var in "$@" ; do
+   tail+=' -iname *'$var'*'
+done
+[ "$tail" ] || die "no search keys?"
+# echo "tail='$tail'"
+
+#set -x
+# both of these (sed variations) work equivalently; -e version may be more portable (and clearer?)
+#                                                              this space after ; is required! --v
+#find "$searchtreeroot" -type f ${tail} | sed    s#^"$searchtreeroot"#"$searchtreerootWindows"#'; 's#/#\\\\#g
+ find "$searchtreeroot" -type f ${tail} | sed -e s#^"$searchtreeroot"#"$searchtreerootWindows"# -e s#/#\\\\#g
