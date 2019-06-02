@@ -1,6 +1,48 @@
+#!/usr/bin/env bash
+#
 # major distros . (source) this file from ~/.bashrc if it exists
 # NB: Ubuntu does not provide a default instance of this file
 
+# to bootstrap the repo containing this file, ***as NON-root***:
+# 0L. sudo apt install -y etckeeper
+# 1L. setxkbmap -layout us -option ctrl:nocaps
+# 2A. copy ~/.ssh/* from another host to gain ssh-keypair
+# 3L. chmod 600 ~/.ssh/*
+# 4A. copy/paste the following into a ***As NON-root*** shell: (leave next line UNcommented!)
+      hgit() { git --git-dir="$HOME/.git-homedir/" --work-tree="$HOME" "$@" ; }  # leave this line UNcommented!
+#     cd && git clone --bare git@github.com:fwmechanic/homedir.git && hgit checkout
+# 5A. hgit config --local status.showUntrackedFiles no
+#     git config --global include.path "$HOME/gitconfig_global"
+#
+echo "loading ~/.bash_aliases"
+
+###############################################################################
+# https://stackoverflow.com/a/18404557
+#
+# !!! ssh-add ONLY loads DEFAULT (private) keys; keys in nondefaultfnm spec'd
+# !!! in $HOME/.ssh/config by identityfile e.g.
+#   IdentityFile <nondefaultfnm>
+#   AddKeysToAgent yes
+# !!! are added later, upon first demand from ssh client.
+# shellcheck source=/dev/null
+src_silently() { . "$1" >| /dev/null ; }
+sshagt_ensure_running() {  # $1: nm of file that any started ssh-agent instance has written its run params ($SSH_AUTH_SOCK, $SSH_AGENT_PID) to
+   [ -f "$1" ] && src_silently "$1"  # defines/exports $SSH_AUTH_SOCK, $SSH_AGENT_PID
+   local agt_run_st ; agt_run_st="$(ssh-add -l >| /dev/null 2>&1; echo $?)"  # 0=agent running w/key; 1=agent w/o key; 2=agent not running
+   # echo "agt_run_st=$agt_run_st SSH_AUTH_SOCK=$SSH_AUTH_SOCK SSH_AGENT_PID=$SSH_AGENT_PID"
+   if [ ! "$SSH_AUTH_SOCK" ] || [ "$agt_run_st" = 2 ]; then
+       # echo "starting agent"
+       (umask 077; ssh-agent >| "$1")  # start agent, write $1
+       src_silently "$1"  # defines/exports $SSH_AUTH_SOCK, $SSH_AGENT_PID
+       # echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK SSH_AGENT_PID=$SSH_AGENT_PID"
+       ssh-add
+   elif [ "$SSH_AUTH_SOCK" ] && [ "$agt_run_st" = 1 ]; then
+       ssh-add
+   fi
+   # ssh-add -l   # list agent-loaded keys
+   }
+sshagt_ensure_running "$HOME/.ssh/bash_aliases_sshagt_params.sh" ; unset -f sshagt_ensure_running src_silently
+# end   auto-load pvt ssh keys per -------- https://help.github.com/articles/working-with-ssh-key-passphrases
 ###############################################################################
 
 # immediate-action commands
@@ -16,10 +58,9 @@ ulimit -c unlimited  # any-sized core files created
 
 # aliases/functions
 
-# see bin/homedir-repo-install
-hgit() { git --git-dir="$HOME/.git-homedir/" --work-tree="$HOME" "$@" ; }
-
 alias x="exit"
+alias g="git"
+alias gg="git gui"
 alias s="ssh -X"
 
 # #### VirtualBox Shared Folders functionality
@@ -46,9 +87,10 @@ vbox_chk() {
    }
 
 # https://news.ycombinator.com/item?id=6310925
-up() { if test "$#" = "1" ; then s=$( printf "%$1s" ); s=${s// /..\/}; cd $s ; else cd .. ; fi ; }
-up() { local s=$(printf "%"${1-1}"s") ; cd ${s// /..\/} ; }  # improved version
+# up() { if test "$#" = "1" ; then s=$( printf "%$1s" ); s=${s// /..\/}; cd $s ; else cd .. ; fi ; }
+up() { local s;s="$(printf "%${1-1}s")" ; cd "${s// /..\/}" || return ; }  # improved version
 
+path() { echo "$PATH" | tr ':' '\n' ; }
 pathperm() { if [ "$#" -ge "1" ] ; then namei -l "$@" ; fi ; }  # http://serverfault.com/a/639215
 
 duh() { du -x --max-depth=1 --human-readable "$@" | sort -r -h | head -11 ; }
@@ -57,6 +99,7 @@ dum() { du -x --max-depth=1 --block-size=M   "$@" | sort -r -n | head -11 | grep
 
 cls() { clear ; }
 r()   { reset ; }
+kc()  { k -x conmsg1 "$@" ; }
 
 # mystery one-liner from https://news.ycombinator.com/item?id=13513171
 # dpkg -l 'linux-' | sed '/^ii/!d;/'"$(uname -r | sed "s/\(.\)-\([^0-9]\+\)/\1/")"'/d;s/^[^ ]* [^ ]* \([^ ]\)./\1/;/[0-9]/!d' | xargs -p sudo apt-get -y purge
@@ -70,3 +113,5 @@ noncurrent_kernel_pkgs() { dpkg -l 'linux-*-[0-9]*' | sed '/^ii/!d;/'"$(uname -r
 # lessons:
 # - wow, you can chain sed commands!  (And each operates on the buffer content as modified by preceding cmds)
 # - sed BRE does NOT support match quantifiers other than '*' (specifically, '+' and '-' are unsupported)
+
+echo "exiting ~/.bash_aliases"

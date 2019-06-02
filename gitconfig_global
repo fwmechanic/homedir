@@ -1,0 +1,37 @@
+
+# NB: this file is part of the "hgit" repo, which is shared among hosts I use
+# NB: this file is part of the "hgit" repo, which is shared among hosts I use
+# NB: this file is part of the "hgit" repo, which is shared among hosts I use
+
+# host-specific git config should be added to ~/.gitconfig which includes this file!
+# see ~/.bash_aliases for details
+
+[user]
+	email = fwmechanic@gmail.com
+	name = Kevin Goodwin
+
+[core]
+	excludesfile = ~/gitignore_global
+
+[push]
+	default = simple
+[pull]
+	rebase = true
+	ff = only
+[merge]
+	conflictstyle = diff3
+	ff = only
+
+[gui]
+	diffopts = -w
+
+[alias]
+	st = status --short --branch
+	stall = status --short --show-stash --ignored
+	co = checkout
+	ci = commit
+	wt = worktree
+	wtl = worktree list
+	br = branch
+	brv = branch -vv
+	indexonly = stash save --keep-index --include-untracked
