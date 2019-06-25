@@ -12,6 +12,8 @@
 
 [core]
 	excludesfile = ~/gitignore_global
+	# fix ^M at end of changed lines in `git diff` output https://stackoverflow.com/a/46265081
+	pager = tr -d '\\r' | less -REX
 
 [push]
 	default = simple
