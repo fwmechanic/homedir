@@ -1,29 +1,35 @@
 #!/usr/bin/env bash
 #
-# major distros . (source) this file from ~/.bashrc if it exists
-# NB: Ubuntu does not provide a default instance of this file
-
+# NB: Ubuntu (& Windows) do not provide a default instance of this file
+#
 # to bootstrap the repo containing this file, ***as NON-root***:
-# 0L. sudo apt install -y etckeeper
-# 1L. setxkbmap -layout us -option ctrl:nocaps
-# 2A. copy ~/.ssh/* from another host to gain ssh-keypair
-# 3L. chmod 600 ~/.ssh/*
-# 4A. copy/paste the following into a ***As NON-root*** shell: (leave next line UNcommented!)
-      hgit() { git --git-dir="$HOME/.git-homedir/" --work-tree="$HOME" "$@" ; }  # leave this line UNcommented!
-#     cd && git clone --bare git@github.com:fwmechanic/homedir.git && hgit checkout
-# 5A. hgit config --local status.showUntrackedFiles no
-#     git config --global include.path "$HOME/gitconfig_global"
+#    (Legend: A:all, L:Linux, W:Windows)
+# L: sudo apt install -y etckeeper             # first things first!
+# L: setxkbmap -layout us -option ctrl:nocaps  # first things first!
+# A: copy ~/.ssh/* from another host to gain ssh-keypair
+#    # If you desire on-demand adding of private keys, use IdentityFile and AddKeysToAgent keywords in ~/.ssh/config as shown below.
+#    # Note that for `IdentityFile <pvtkyfnm>`  <pvtkyfnm> MUST specify full path and ~ can be used.
+# L: chmod 600 ~/.ssh/*
+# A: ssh -T git@github.com  # verify ssh; to assist debug, add -v
+#    leave next line UNcommented!
+     hgit() { git --git-dir="$HOME/.git-homedir/" --work-tree="$HOME" "$@" ; }  # leave this line UNcommented!
+# A: Run ONE of the following:
+#    cd && git clone --bare git@github.com:fwmechanic/homedir.git .git-homedir && hgit checkout
+# A: echo 'test -f ~/.bash_aliases && . ~/.bash_aliases' >> ~/.bashrc
+# A: hgit config --local status.showUntrackedFiles no
+# A: git config --global include.path "$HOME/gitconfig_global"
 #
 echo "loading ~/.bash_aliases"
 
 ###############################################################################
 # https://stackoverflow.com/a/18404557
 #
-# !!! ssh-add ONLY loads DEFAULT (private) keys; keys in nondefaultfnm spec'd
+# !!! ssh-add ONLY loads (private) keys from DEFAULT-named key files;
+# !!! keys in nondefaultfnm files which are specfied by IdentityFile
 # !!! in $HOME/.ssh/config by identityfile e.g.
-#   IdentityFile <nondefaultfnm>
+#   IdentityFile ~/.ssh/kg-20140516.ppk-openssh   # <-- note must specify full path, and that ~ can be used
 #   AddKeysToAgent yes
-# !!! are added later, upon first demand from ssh client.
+# !!! are ssh-add'ed later, upon first demand from ssh client.
 # shellcheck source=/dev/null
 src_silently() { . "$1" >| /dev/null ; }
 sshagt_ensure_running() {  # $1: nm of file that any started ssh-agent instance has written its run params ($SSH_AUTH_SOCK, $SSH_AGENT_PID) to
