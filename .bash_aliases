@@ -10,14 +10,12 @@
 #    # If you desire on-demand adding of private keys, use IdentityFile and AddKeysToAgent keywords in ~/.ssh/config as shown below.
 #    # Note that for `IdentityFile <pvtkyfnm>`  <pvtkyfnm> MUST specify full path and ~ can be used.
 # L: chmod 600 ~/.ssh/*
-# A: ssh -T git@github.com  # verify ssh; to assist debug, add -v
+# A: ssh -T git@github.com  # verify ssh to github: you'll need to enter key passphrase; to assist debug, add -v
 #    leave next line UNcommented!
      hgit() { git --git-dir="$HOME/.git-homedir/" --work-tree="$HOME" "$@" ; }  # leave this line UNcommented!
-# A: Run ONE of the following:
-#    cd && git clone --bare git@github.com:fwmechanic/homedir.git .git-homedir && hgit checkout
+# A: cd && git clone --bare git@github.com:fwmechanic/homedir.git .git-homedir && hgit checkout
 # A: echo 'test -f ~/.bash_aliases && . ~/.bash_aliases' >> ~/.bashrc
-# A: hgit config --local status.showUntrackedFiles no
-# A: git config --global include.path "$HOME/gitconfig_global"
+# A: hgit config --local status.showUntrackedFiles no ; git config --global include.path "$HOME/gitconfig_global"
 #
 echo "loading ~/.bash_aliases"
 
@@ -25,9 +23,9 @@ echo "loading ~/.bash_aliases"
 # https://stackoverflow.com/a/18404557
 #
 # !!! ssh-add ONLY loads (private) keys from DEFAULT-named key files;
-# !!! keys in nondefaultfnm files which are specfied by IdentityFile
-# !!! in $HOME/.ssh/config by identityfile e.g.
-#   IdentityFile ~/.ssh/kg-20140516.ppk-openssh   # <-- note must specify full path, and that ~ can be used
+# !!! keys in NON-default-named files which must be specified
+# !!! in $HOME/.ssh/config by IdentityFile e.g.
+#   IdentityFile ~/.ssh/kg-20140516.ppk-openssh   # <-- NB: must specify full path, ~ can be used  https://man.openbsd.org/ssh_config.5
 #   AddKeysToAgent yes
 # !!! are ssh-add'ed later, upon first demand from ssh client.
 # shellcheck source=/dev/null
