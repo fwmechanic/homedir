@@ -88,32 +88,29 @@ case "$(uname -s)" in
 
 # immediate-action commands
 
-# add2path doesn't add duplicate PATH entries
-add2path() { [ -d "$1" ] && ! grep -qP '(\A|:)\Q'"$1"'\E(:|\z)' <<<"$PATH" && { PATH="$PATH:$1" ; echo "added2path ${2:-$1}" ; } ; }
+# catpath: nop if $1 already in $PATH
+#    [[LC_ALL="" LANG="en_US.UTF-8"]]   added to avoid "grep: -P supports only unibyte and UTF-8 locales"  (I tend to have LC_ALL="C" on some (Windows) hosts I use)
+catpath() { [[ -d "$1" ]] && ! LC_ALL="" LANG="en_US.UTF-8" grep -qP '(\A|:)\Q'"$1"'\E(:|\z)' <<<"$PATH" && { PATH="$PATH:$1" ; echo "PATH += ${2:-$1}" ; } ; }
 
 add_nuwen_gcc() {  # approx functional equivalent of ~/my/bin/mingw/set_distro_paths.bat
-   local nuwen_mingw_dnm="$HOME/my/bin/mingw"
+   local nuwen_mingw_dnm="${1:-$HOME/my/bin/mingw}"
    local d1="$nuwen_mingw_dnm/include"           ; [[ -d "$d1" ]] # && echo "d1 is a dir"
    local d2="$nuwen_mingw_dnm/include/freetype2" ; [[ -d "$d2" ]] # && echo "d2 is a dir"
    if [[ -d "$nuwen_mingw_dnm" && -d "$nuwen_mingw_dnm/bin" && -x "$nuwen_mingw_dnm/bin/gcc" && -d "$d1" && -d "$d2" ]] ; then
-      add2path "$nuwen_mingw_dnm/bin" "Nuwen MinGW GCC"
-      local X_MEOW="$d1:$d2"
+      catpath "$nuwen_mingw_dnm/bin" "Nuwen MinGW GCC"
+      local X_MEOW="$d1:$d2"  # name from ~/my/bin/mingw/set_distro_paths.bat
       # >/dev/null command -v cygpath && X_MEOW="$(cygpath -pw "$X_MEOW")"  # unnecessary as it turns out
+      # why export needed here but not when assigning PATH in catpath?
       export C_INCLUDE_PATH="$X_MEOW${C_INCLUDE_PATH:+:}$C_INCLUDE_PATH"             # ; echo "C_INCLUDE_PATH=$C_INCLUDE_PATH"
       export CPLUS_INCLUDE_PATH="$X_MEOW${CPLUS_INCLUDE_PATH:+:}$CPLUS_INCLUDE_PATH" # ; echo "CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH"
    fi
    }
 
-add2path ~/my/repos/scripts
-add2path ~/my/repos/winscripts
-add2path ~/my/bin
-add2path ~/bin
+catpath ~/my/repos/scripts     # [ -d ~/my/repos/scripts ] && PATH=$PATH:~/my/repos/scripts
+catpath ~/my/repos/winscripts  # [ -d ~/my/repos/winscripts ] && PATH=$PATH:~/my/repos/winscripts
+catpath ~/my/bin               # [ -d ~/my/bin ] && PATH=$PATH:~/my/bin
+catpath ~/bin                  # [ -d ~/bin    ] && PATH=$PATH:~/bin
 add_nuwen_gcc
-
-# [ -d ~/my/repos/scripts ] && PATH=$PATH:~/my/repos/scripts
-# [ -d ~/my/repos/winscripts ] && PATH=$PATH:~/my/repos/winscripts
-# [ -d ~/my/bin ] && PATH=$PATH:~/my/bin
-# [ -d ~/bin    ] && PATH=$PATH:~/bin
 
 ###############################################################################
 
@@ -125,6 +122,9 @@ alias gg="git gui"
 alias s="ssh -X"
 
 mr() { cd $HOME/my/repos/"$1" ; }
+mrk() { mr "k_edit" ; }
+mrs() { mr "scripts" ; }
+mrw() { mr "winscripts" ; }
 
 # #### VirtualBox Shared Folders functionality
 #
