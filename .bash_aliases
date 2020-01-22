@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-#
-# NB: Ubuntu (& Windows) do not provide a default instance of this file
-#
+
 # to bootstrap the repo containing this file, ***as NON-root***:
-#    (Legend: A:all, L:Linux, W:Windows)
-# L: sudo apt install -y etckeeper             # first things first!
-# L: setxkbmap -layout us -option ctrl:nocaps  # first things first!
+#   Legend:
+# A:all
+# L:Linux
+# W:Windows
+#
+# L: sudo apt install -y etckeeper  # first things first!
 # A: copy ~/.ssh/* from another host to gain ssh-keypair
 #    # If you desire on-demand adding of private keys, use IdentityFile and AddKeysToAgent keywords in ~/.ssh/config as shown below.
 #    # Note that for `IdentityFile <pvtkyfnm>`  <pvtkyfnm> MUST specify full path and ~ can be used.
@@ -13,10 +14,12 @@
 # A: ssh -T git@github.com  # verify ssh to github: you'll need to enter key passphrase; to assist debug, add -v
 #    leave next line UNcommented!
      hgit() { git --git-dir="$HOME/.git-homedir/" --work-tree="$HOME" "$@" ; }  # leave this line UNcommented!
-# A: cd && git clone --bare git@github.com:fwmechanic/homedir.git .git-homedir && hgit checkout
+# A: cd && git clone --bare git@github.com:fwmechanic/homedir.git .git-homedir && hgit config --local status.showUntrackedFiles no && hgit checkout
+# A: git config --global include.path "$HOME/gitconfig_global"
 # A: echo 'test -f ~/.bash_aliases && . ~/.bash_aliases' >> ~/.bashrc
-# A: hgit config --local status.showUntrackedFiles no ; git config --global include.path "$HOME/gitconfig_global"
 #
+# NB: Ubuntu (& Windows) do not provide a default instance of this file
+
 echo "loading ~/.bash_aliases"
 
 ###############################################################################
@@ -56,14 +59,14 @@ case "$(uname -s)" in
 
    Linux)
       # echo 'Linux'
-      command -v setxkbmap && setxkbmap -layout us -option ctrl:nocaps -option numpad:microsoft
-      command -v namei && pathperm() { if [ "$#" -ge "1" ] ; then namei -l "$@" ; fi ; }  # http://serverfault.com/a/639215
-      command -v ulimit && ulimit -c unlimited  # any-sized core files created
+      >/dev/null command -v setxkbmap && setxkbmap -layout us -option ctrl:nocaps -option numpad:microsoft
+      >/dev/null command -v namei && pathperm() { if [ "$#" -ge "1" ] ; then namei -l "$@" ; fi ; }  # http://serverfault.com/a/639215
+      >/dev/null command -v ulimit && ulimit -c unlimited  # any-sized core files created
 
       # mystery one-liner from https://news.ycombinator.com/item?id=13513171
       # dpkg -l 'linux-' | sed '/^ii/!d;/'"$(uname -r | sed "s/\(.\)-\([^0-9]\+\)/\1/")"'/d;s/^[^ ]* [^ ]* \([^ ]\)./\1/;/[0-9]/!d' | xargs -p sudo apt-get -y purge
       # my corrected version:
-      command -v dpkg && noncurrent_kernel_pkgs() { dpkg -l 'linux-*-[0-9]*' | sed '/^ii/!d;/'"$(uname -r | sed "s/\(.\)-\([^0-9]\+\)/\1/")"'/d;s/^ii *\([^ ][^ ]*\)[^ ]*.*/\1/' ; }
+      >/dev/null command -v dpkg && noncurrent_kernel_pkgs() { dpkg -l 'linux-*-[0-9]*' | sed '/^ii/!d;/'"$(uname -r | sed "s/\(.\)-\([^0-9]\+\)/\1/")"'/d;s/^ii *\([^ ][^ ]*\)[^ ]*.*/\1/' ; }
       # usage: noncurrent_kernel_pkgs | xargs -p sudo apt-get -y purge
       # corrections:
       # - $(dpkg -l 'linux-') returns nothing
@@ -85,12 +88,32 @@ case "$(uname -s)" in
 
 # immediate-action commands
 
-add2path() { [ -d "$1" ] && PATH="$PATH:$1" ; }
+# add2path doesn't add duplicate PATH entries
+add2path() { [ -d "$1" ] && ! grep -qP '(\A|:)\Q'"$1"'\E(:|\z)' <<<"$PATH" && { PATH="$PATH:$1" ; echo "added2path ${2:-$1}" ; } ; }
 
-[ -d ~/my/repos/scripts ] && PATH=$PATH:~/my/repos/scripts
-[ -d ~/my/repos/winscripts ] && PATH=$PATH:~/my/repos/winscripts
-[ -d ~/my/bin ] && PATH=$PATH:~/my/bin
-[ -d ~/bin    ] && PATH=$PATH:~/bin
+add_nuwen_gcc() {  # approx functional equivalent of ~/my/bin/mingw/set_distro_paths.bat
+   local nuwen_mingw_dnm="$HOME/my/bin/mingw"
+   local d1="$nuwen_mingw_dnm/include"           ; [[ -d "$d1" ]] # && echo "d1 is a dir"
+   local d2="$nuwen_mingw_dnm/include/freetype2" ; [[ -d "$d2" ]] # && echo "d2 is a dir"
+   if [[ -d "$nuwen_mingw_dnm" && -d "$nuwen_mingw_dnm/bin" && -x "$nuwen_mingw_dnm/bin/gcc" && -d "$d1" && -d "$d2" ]] ; then
+      add2path "$nuwen_mingw_dnm/bin" "Nuwen MinGW GCC"
+      local X_MEOW="$d1:$d2"
+      # >/dev/null command -v cygpath && X_MEOW="$(cygpath -pw "$X_MEOW")"  # unnecessary as it turns out
+      export C_INCLUDE_PATH="$X_MEOW${C_INCLUDE_PATH:+:}$C_INCLUDE_PATH"             # ; echo "C_INCLUDE_PATH=$C_INCLUDE_PATH"
+      export CPLUS_INCLUDE_PATH="$X_MEOW${CPLUS_INCLUDE_PATH:+:}$CPLUS_INCLUDE_PATH" # ; echo "CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH"
+   fi
+   }
+
+add2path ~/my/repos/scripts
+add2path ~/my/repos/winscripts
+add2path ~/my/bin
+add2path ~/bin
+add_nuwen_gcc
+
+# [ -d ~/my/repos/scripts ] && PATH=$PATH:~/my/repos/scripts
+# [ -d ~/my/repos/winscripts ] && PATH=$PATH:~/my/repos/winscripts
+# [ -d ~/my/bin ] && PATH=$PATH:~/my/bin
+# [ -d ~/bin    ] && PATH=$PATH:~/bin
 
 ###############################################################################
 
@@ -100,6 +123,8 @@ alias x="exit"
 alias g="git"
 alias gg="git gui"
 alias s="ssh -X"
+
+mr() { cd $HOME/my/repos/"$1" ; }
 
 # #### VirtualBox Shared Folders functionality
 #
