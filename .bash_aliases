@@ -16,9 +16,9 @@
      hgit() { git --git-dir="$HOME/.git-homedir/" --work-tree="$HOME" "$@" ; }  # leave this line UNcommented!
 # A: cd && git clone --bare git@github.com:fwmechanic/homedir.git .git-homedir && hgit config --local status.showUntrackedFiles no && hgit checkout
 # A: git config --global include.path "$HOME/gitconfig_global"
+#    # Ubuntu (& Windows) do not provide a default instance of ~/.bash_aliases
 # A: echo 'test -f ~/.bash_aliases && . ~/.bash_aliases' >> ~/.bashrc
-#
-# NB: Ubuntu (& Windows) do not provide a default instance of this file
+# A: mkdir -p ~/my/repos && cd ~/my/repos && git clone git@github.com:fwmechanic/shell.git
 
 echo "loading ~/.bash_aliases"
 
@@ -107,9 +107,9 @@ add_nuwen_gcc() {  # approx functional equivalent of ~/my/bin/mingw/set_distro_p
    }
 
 catpath ~/my/repos/scripts     # [ -d ~/my/repos/scripts ] && PATH=$PATH:~/my/repos/scripts
+catpath ~/my/repos/shell       # [ -d ~/my/repos/shell ]   && PATH=$PATH:~/my/repos/shell
 catpath ~/my/repos/winscripts  # [ -d ~/my/repos/winscripts ] && PATH=$PATH:~/my/repos/winscripts
 catpath ~/my/bin               # [ -d ~/my/bin ] && PATH=$PATH:~/my/bin
-catpath ~/bin                  # [ -d ~/bin    ] && PATH=$PATH:~/bin
 add_nuwen_gcc
 
 ###############################################################################
