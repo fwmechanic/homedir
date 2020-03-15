@@ -19,6 +19,8 @@
 #    # Ubuntu (& Windows) do not provide a default instance of ~/.bash_aliases
 # A: echo 'test -f ~/.bash_aliases && . ~/.bash_aliases' >> ~/.bashrc
 # A: mkdir -p ~/my/repos && cd ~/my/repos && git clone git@github.com:fwmechanic/shell.git
+# W: mkdir -p ~/my/repos && cd ~/my/repos && git clone git@github.com:fwmechanic/winscripts.git
+# W: ~/my/repos/winscripts/winupdtuserpath  # to add certain ~/my/... dirs to $PATH
 
 echo "loading ~/.bash_aliases"
 
