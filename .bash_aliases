@@ -106,11 +106,14 @@ add_nuwen_gcc() {  # approx functional equivalent of ~/my/bin/mingw/set_distro_p
    fi
    }
 
-catpath ~/my/repos/scripts     # [ -d ~/my/repos/scripts ] && PATH=$PATH:~/my/repos/scripts
 catpath ~/my/repos/shell       # [ -d ~/my/repos/shell ]   && PATH=$PATH:~/my/repos/shell
-catpath ~/my/repos/winscripts  # [ -d ~/my/repos/winscripts ] && PATH=$PATH:~/my/repos/winscripts
-catpath ~/my/bin               # [ -d ~/my/bin ] && PATH=$PATH:~/my/bin
 add_nuwen_gcc
+k_in_repos="$HOME/my/repos/k_edit/k"
+if [[ -x "$k_in_repos" ]]; then
+   export GIT_EDITOR="$k_in_repos"
+   export EDITOR="$k_in_repos"
+   echo "added GIT_EDITOR=EDITOR=$k_in_repos"
+fi
 
 ###############################################################################
 
