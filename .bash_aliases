@@ -96,8 +96,8 @@ catpath() { [[ -d "$1" ]] && ! LC_ALL="" LANG="en_US.UTF-8" grep -qP '(\A|:)\Q'"
 
 add_nuwen_gcc() {  # approx functional equivalent of ~/my/bin/mingw/set_distro_paths.bat
    local nuwen_mingw_dnm="${1:-$HOME/my/bin/mingw}"
-   local d1="$nuwen_mingw_dnm/include"           ; [[ -d "$d1" ]] # && echo "d1 is a dir"
-   local d2="$nuwen_mingw_dnm/include/freetype2" ; [[ -d "$d2" ]] # && echo "d2 is a dir"
+   local d1="$nuwen_mingw_dnm/include"           # ; [[ -d "$d1" ]] && echo "d1 is a dir"
+   local d2="$nuwen_mingw_dnm/include/freetype2" # ; [[ -d "$d2" ]] && echo "d2 is a dir"
    if [[ -d "$nuwen_mingw_dnm" && -d "$nuwen_mingw_dnm/bin" && -x "$nuwen_mingw_dnm/bin/gcc" && -d "$d1" && -d "$d2" ]] ; then
       catpath "$nuwen_mingw_dnm/bin" "Nuwen MinGW GCC"
       local X_MEOW="$d1:$d2"  # name from ~/my/bin/mingw/set_distro_paths.bat
