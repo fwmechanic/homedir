@@ -160,6 +160,7 @@ up() { local s;s="$(printf "%${1-1}s")" ; cd "${s// /..\/}" || return ; }  # imp
 
 path() { echo "$PATH" | tr ':' '\n' ; }
 
+kdf() { df -hlT -xtmpfs -xdevtmpfs ; }
 duh() { du -x --max-depth=1 --human-readable "$@" | sort -r -h | head -11 ; }
 duk() { du -x --max-depth=1 --block-size=K   "$@" | sort -r -n | head -11 | grep -v "^1K" ; }
 dum() { du -x --max-depth=1 --block-size=M   "$@" | sort -r -n | head -11 | grep -v "^1M" ; }
