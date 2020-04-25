@@ -82,6 +82,8 @@ case "$(uname -s)" in
    Linux)
       # echo 'Linux'
       catpath ~/my/repos/k_edit  # [ -d ~/my/repos/k_edit ]   && PATH=$PATH:~/my/repos/k_edit
+      export INSTALL="$HOME"     # default autotools' `make install` to install built binaries to "$HOME/usr/local/bin" ...
+      catpath "$INSTALL/usr/local/bin"  # ... and add this to PATH
 
       >/dev/null command -v setxkbmap && setxkbmap -layout us -option ctrl:nocaps -option numpad:microsoft
       >/dev/null command -v namei && pathperm() { if [ "$#" -ge "1" ] ; then namei -l "$@" ; fi ; }  # http://serverfault.com/a/639215
