@@ -164,9 +164,10 @@ up() { local s;s="$(printf "%${1-1}s")" ; cd "${s// /..\/}" || return ; }  # imp
 path() { echo "$PATH" | tr ':' '\n' ; }
 
 kdf() { df -hlT -xtmpfs -xdevtmpfs ; }
-duh() { du -x --max-depth=1 --human-readable "$@" | sort -r -h | head -11 ; }
-duk() { du -x --max-depth=1 --block-size=K   "$@" | sort -r -n | head -11 | grep -v "^1K" ; }
-dum() { du -x --max-depth=1 --block-size=M   "$@" | sort -r -n | head -11 | grep -v "^1M" ; }
+duh() { du -x --max-depth=1 --human-readable "$@" | sort -r -h | tail -n +2 ; }  # `tail -n +2` deletes the first line (sum, '.')
+duk() { du -x --max-depth=1 --block-size=K -t1K "$@" | sort -r -n | tail -n +2 ; }
+dum() { du -x --max-depth=1 --block-size=M -t1M "$@" | sort -r -n | tail -n +2 ; }
+dug() { du -x --max-depth=1 --block-size=G -t1G "$@" | sort -r -n | tail -n +2 ; }
 
 cls() { clear ; }
 r()   { reset ; }
