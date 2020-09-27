@@ -7,6 +7,9 @@
 # W:Windows
 #
 # L: sudo apt install -y etckeeper  # first things first!
+# W: install chocolatey (to install git) https://chocolatey.org/install
+# W: choco feature enable -n=useRememberedArgumentsForUpgrades
+# W: choco install -y git.install --params "/GitAndUnixToolsOnPath /WindowsTerminal /NoCredentialManager /NoAutoCrlf"
 # A: copy ~/.ssh/* from another host to gain ssh-keypair
 #    # If you desire on-demand adding of private keys, use IdentityFile and AddKeysToAgent keywords in ~/.ssh/config as shown below.
 #    # Note that for `IdentityFile <pvtkyfnm>`  <pvtkyfnm> MUST specify full path and ~ can be used.
