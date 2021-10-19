@@ -57,6 +57,14 @@ sshagt_ensure_running "$HOME/.ssh/bash_aliases_sshagt_params.sh" ; unset -f ssha
 # end   auto-load pvt ssh keys per -------- https://help.github.com/articles/working-with-ssh-key-passphrases
 ###############################################################################
 
+rmpath() { # remove from PATH the directory of `which "$1"`
+   local fnm fpath ; fnm="$(which "$1")" || { echo "$1 not found" ; return 1 ; }
+   fpath="${fnm%/*}"  # entries in PATH always have a directory prefix; isolate it
+   PATH="$(echo "$PATH" | tr ':' '\n' | grep -vP '^\Q'"$fpath"'\E/?$' | tr '\n' ':')"
+   echo "rmpath: removed $fpath"
+   return 0
+   }
+
 # catpath: nop if $1 already in $PATH
 #    [[ LC_ALL="" LANG="en_US.UTF-8" ]]   added to avoid "grep: -P supports only unibyte and UTF-8 locales"  (I tend to have LC_ALL="C" on some (Windows) hosts I use)
 catpath() { [[ -d "$1" ]] && ! LC_ALL="" LANG="en_US.UTF-8" grep -qP '(\A|:)\Q'"$1"'\E(:|\z)' <<<"$PATH" && { PATH="$PATH:$1" ; echo "PATH += ${2:-$1}" ; } ; }
@@ -94,6 +102,7 @@ case "$(uname -s)" in
 
    CYGWIN*|MINGW64*|MINGW32*|MSYS*)
       # echo 'MS Windows'
+      rmpath gcc  # if Strawberry Perl is installed, it puts a dir containing gcc in PATH; we (git bash already have our own Perl, and gcc from Nuwen
       add_nuwen_gcc() {  # approx functional equivalent of ~/my/bin/mingw/set_distro_paths.bat
          local nuwen_mingw_dnm="$1"
          local d1="$nuwen_mingw_dnm/include"           # ; [[ -d "$d1" ]] && echo "d1 is a dir"
@@ -173,13 +182,6 @@ vbox_chk() {
 up() { local s;s="$(printf "%${1-1}s")" ; cd "${s// /..\/}" || return ; }  # improved version
 
 path() { echo "$PATH" | tr ':' '\n' ; }
-rmpath() { # remove from PATH the directory of `which "$1"`
-   local fnm fpath ; fnm="$(which "$1")" || { echo "$1 not found" ; return 1 ; }
-   fpath="${fnm%/*}"  # entries in PATH always have a directory prefix; isolate it
-   PATH="$(echo "$PATH" | tr ':' '\n' | grep -vP '^\Q'"$fpath"'\E/?$' | tr '\n' ':')"
-   echo "rmpath: removed $fpath"
-   return 0
-   }
 
 kdf() { df -hlT -xtmpfs -xdevtmpfs ; }
 duh() { du -x --max-depth=1 --human-readable "$@" | sort -r -h | tail -n +2 ; }  # `tail -n +2` deletes the first line (sum, '.')
