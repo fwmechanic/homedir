@@ -189,11 +189,25 @@ up() { local s;s="$(printf "%${1-1}s")" ; cd "${s// /..\/}" || return ; }  # imp
 
 path() { echo "$PATH" | tr ':' '\n' ; }
 
-kdf() { df -hlT -xtmpfs -xdevtmpfs ; }
-duh() { du -x --max-depth=1 --human-readable "$@" | sort -r -h | tail -n +2 ; }  # `tail -n +2` deletes the first line (sum, '.')
-duk() { du -x --max-depth=1 --block-size=K -t1K "$@" | sort -r -n | tail -n +2 ; }
-dum() { du -x --max-depth=1 --block-size=M -t1M "$@" | sort -r -n | tail -n +2 ; }
-dug() { du -x --max-depth=1 --block-size=G -t1G "$@" | sort -r -n | tail -n +2 ; }
+# want to sort df output on the mount column (7); df by dflt sorts on device name, which can vary across reboots;
+# problem: how to exclude header line from sort but still display it?  There seem to be two good ways:
+kdf() { df -hlT -xtmpfs -xdevtmpfs | ( sed -u 1q; sort -k 7,7 ) ; }  # cleaner and trivially adaptable to multiple header lines, but requires GNU(-compat) version of _external_ pgm (sed)  https://stackoverflow.com/a/56151840
+kdf() { df -hlT -xtmpfs -xdevtmpfs | ( IFS= read -r h; printf "%s\n" "$h"; sort -k 7,7 ) ; }  # uses only shell builtins, but more syntax  https://stackoverflow.com/a/27368739
+
+duh() ( f=$(mktemp) ; for dn in "$@" ; do du -x --max-depth=1 --human-readable    "$dn" | head -n -1 >>"$f" ; done ; <"$f" sort -r -h ; rm -f "$f" )
+duk() ( f=$(mktemp) ; for dn in "$@" ; do du -x --max-depth=1 --block-size=K -t1K "$dn" | head -n -1 >>"$f" ; done ; <"$f" sort -r -n ; rm -f "$f" )
+dum() ( f=$(mktemp) ; for dn in "$@" ; do du -x --max-depth=1 --block-size=M -t1M "$dn" | head -n -1 >>"$f" ; done ; <"$f" sort -r -n ; rm -f "$f" )
+dug() ( f=$(mktemp) ; for dn in "$@" ; do du -x --max-depth=1 --block-size=G -t1G "$dn" | head -n -1 >>"$f" ; done ; <"$f" sort -r -n ; rm -f "$f" )
+
+# https://unix.stackexchange.com/a/579536  but doesn't seem to work for me
+# f=$(mktemp); exec 3<"$f" 4>"$f"; rm "$f"; # ... use >&3 and <&4 instead of >"$f" or <"$f"
+#
+# ftst() ( f=$(mktemp); exec 3<"$f" 4>"$f"; rm "$f"; echo "foo" >&3 ; echo "bar" >&3 ; cat <&4 )
+# ftst() ( f=$(mktemp); exec 3<"$f" 4>"$f"; rm "$f"; echo "foo" <&3 ; echo "bar" <&3 ; cat >&4 )
+# ftst() ( f=$(mktemp); exec 3<>"$f"; rm "$f"; echo "foo" <&3 ; echo "bar" <&3 ; cat >&3 ) prints but hangs
+# ftst() ( f=$(mktemp); exec 3<>"$f"; rm "$f"; echo "foo" <&3 ; echo "bar" <&3 ; >&3 )  works?  but using backward syntax!
+# ftst() ( f=$(mktemp); exec 3<>"$f"; rm "$f"; echo "foo" >&3 ; echo "bar" >&3 ; >&3 )
+# ftst() ( f=$(mktemp); exec 3<>"$f"; rm "$f"; printf "foo\n" >&3 ; printf "bar\n" >&3 ; cat <&3 )
 
 cls() { clear ; }
 r()   { reset ; }
