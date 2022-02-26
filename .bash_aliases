@@ -57,13 +57,7 @@ sshagt_ensure_running "$HOME/.ssh/bash_aliases_sshagt_params.sh" ; unset -f ssha
 # end   auto-load pvt ssh keys per -------- https://help.github.com/articles/working-with-ssh-key-passphrases
 ###############################################################################
 
-rmpath() { # remove from PATH the directory of `which "$1"`
-   local fnm fpath ; fnm="$(which "$1")" || { echo "$1 not found" ; return 1 ; }
-   fpath="${fnm%/*}"  # entries in PATH always have a directory prefix; isolate it
-   PATH="$(echo "$PATH" | tr ':' '\n' | grep -vP '^\Q'"$fpath"'\E/?$' | tr '\n' ':')"
-   echo "rmpath: removed $fpath"
-   return 0
-   }
+untilfail() { while "$@"; do :; done ; }
 
 # catpath: nop if $1 already in $PATH
 #    [[ LC_ALL="" LANG="en_US.UTF-8" ]]   added to avoid "grep: -P supports only unibyte and UTF-8 locales"  (I tend to have LC_ALL="C" on some (Windows) hosts I use)
@@ -102,12 +96,24 @@ case "$(uname -s)" in
 
    CYGWIN*|MINGW64*|MINGW32*|MSYS*)
       # echo 'MS Windows'
-      rmpath gcc  # if Strawberry Perl is installed, it puts a dir containing gcc in PATH; we (git bash already have our own Perl, and gcc from Nuwen
+      # (Windows) installers for Strawberry Perl & FreePascal come with their own GCC (fine) and add the dir containing GCC to $PATH (annoying; assuming GCC is only
+      # needed by their SW-internal processes (building), why not leave the buckets of "batteries included" .exes in a dir NOT in $PATH but relative to some public
+      # entrypoint binary (e.g. perl.exe or fpc.exe)?)
+      # if Strawberry Perl is installed, it puts a dir containing gcc in PATH; we (git bash) already have our own Perl, and want gcc from Nuwen
+      # if FreePascal      is installed, it puts a dir containing gcc in PATH; we want gcc from Nuwen
+      rmpath() { # remove from PATH the directory of `which "$1"`; this approach is probably inappropriate for Linux
+         local fnm fpath ; fnm="$(which "$1" 2>/dev/null)" || { return 1 ; }
+         fpath="${fnm%/*}"  # entries in PATH always have a directory prefix; isolate it
+         PATH="$(echo "$PATH" | tr ':' '\n' | grep -vP '^\Q'"$fpath"'\E/?$' | tr '\n' ':')"
+         echo "rmpath: removed $fpath"
+         return 0
+         }
       add_nuwen_gcc() {  # approx functional equivalent of ~/my/bin/mingw/set_distro_paths.bat
          local nuwen_mingw_dnm="$1"
          local d1="$nuwen_mingw_dnm/include"           # ; [[ -d "$d1" ]] && echo "d1 is a dir"
          local d2="$nuwen_mingw_dnm/include/freetype2" # ; [[ -d "$d2" ]] && echo "d2 is a dir"
          if [[ -d "$nuwen_mingw_dnm" && -d "$nuwen_mingw_dnm/bin" && -x "$nuwen_mingw_dnm/bin/gcc" && -d "$d1" && -d "$d2" ]] ; then
+            untilfail rmpath gcc
             catpath "$nuwen_mingw_dnm/bin" "Nuwen MinGW GCC"
             local X_MEOW="$d1:$d2"  # name from ~/my/bin/mingw/set_distro_paths.bat
             # >/dev/null command -v cygpath && X_MEOW="$(cygpath -pw "$X_MEOW")"  # unnecessary as it turns out
@@ -116,8 +122,8 @@ case "$(uname -s)" in
             export CPLUS_INCLUDE_PATH="$X_MEOW${CPLUS_INCLUDE_PATH:+:}$CPLUS_INCLUDE_PATH" # ; echo "CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH"
          fi
          }
-      add_nuwen_gcc "$HOME/my/bin/mingw"
-      unset -f add_nuwen_gcc
+      nuwen() { add_nuwen_gcc "$HOME/my/bin/mingw" ; }
+      echo "run nuwen to put Nuwen GCC in PATH" # most shells I open do not need Nuwen GCC, so defer this action till/when needed
       ;;
 
    *)
