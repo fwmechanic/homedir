@@ -198,7 +198,7 @@ duh1_() ( du -x --max-depth=1 --human-readable    "$1" | head -n -1 ) # drop las
 duk1_() ( du -x --max-depth=1 --block-size=K -t1K "$1" | head -n -1 ) # drop last line, sum of all, to simulate nonexistent --min-depth du option
 dum1_() ( du -x --max-depth=1 --block-size=M -t1M "$1" | head -n -1 ) # drop last line, sum of all, to simulate nonexistent --min-depth du option
 dug1_() ( du -x --max-depth=1 --block-size=G -t1G "$1" | head -n -1 ) # drop last line, sum of all, to simulate nonexistent --min-depth du option
-do_cmd_() ( c="$1" ; shift || return ; for d in "$@" ; do "$c" "$d" ; done )
+do_cmd_() ( c="$1" ; shift ; for d in "$@" ; do "$c" "$d" ; done )
 duh() ( do_cmd_ duh1_ "$@" | sort -r -h )
 duk() ( do_cmd_ duk1_ "$@" | sort -r -n )
 dum() ( do_cmd_ dum1_ "$@" | sort -r -n )
