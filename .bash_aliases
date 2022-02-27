@@ -200,14 +200,16 @@ dum() ( f=$(mktemp) ; for dn in "$@" ; do du -x --max-depth=1 --block-size=M -t1
 dug() ( f=$(mktemp) ; for dn in "$@" ; do du -x --max-depth=1 --block-size=G -t1G "$dn" | head -n -1 >>"$f" ; done ; <"$f" sort -r -n ; rm -f "$f" )
 
 # https://unix.stackexchange.com/a/579536  but doesn't seem to work for me
-# f=$(mktemp); exec 3<"$f" 4>"$f"; rm "$f"; # ... use >&3 and <&4 instead of >"$f" or <"$f"
+# f="$(mktemp)"; exec 3<"$f" 4>"$f"; rm "$f"; # ... use >&3 and <&4 instead of >"$f" or <"$f"
 #
-# ftst() ( f=$(mktemp); exec 3<"$f" 4>"$f"; rm "$f"; echo "foo" >&3 ; echo "bar" >&3 ; cat <&4 )
-# ftst() ( f=$(mktemp); exec 3<"$f" 4>"$f"; rm "$f"; echo "foo" <&3 ; echo "bar" <&3 ; cat >&4 )
-# ftst() ( f=$(mktemp); exec 3<>"$f"; rm "$f"; echo "foo" <&3 ; echo "bar" <&3 ; cat >&3 ) prints but hangs
-# ftst() ( f=$(mktemp); exec 3<>"$f"; rm "$f"; echo "foo" <&3 ; echo "bar" <&3 ; >&3 )  works?  but using backward syntax!
-# ftst() ( f=$(mktemp); exec 3<>"$f"; rm "$f"; echo "foo" >&3 ; echo "bar" >&3 ; >&3 )
-# ftst() ( f=$(mktemp); exec 3<>"$f"; rm "$f"; printf "foo\n" >&3 ; printf "bar\n" >&3 ; cat <&3 )
+# ftst() ( f="$(mktemp)"; stat "$f"; exec 3<"$f" 4>"$f"; echo "foo" >&3 ; echo "bar" >&3 ; cat <&4; rm "$f" )
+# ftst() ( f="$(mktemp)"; exec 3<"$f" 4>"$f"; rm "$f"; echo "foo" >&3 ; echo "bar" >&3 ; cat <&4 )
+# ftst() ( f="$(mktemp)"; exec 3<"$f" 4>"$f"; rm "$f"; echo "foo" >&3 ; echo "bar" >&3 ; exec 3<&- ; cat <&4 )
+# ftst() ( f="$(mktemp)"; exec 3<"$f" 4>"$f"; rm "$f"; echo "foo" <&3 ; echo "bar" <&3 ; cat >&4 )
+# ftst() ( f="$(mktemp)"; exec 3<>"$f"; rm "$f"; echo "foo" <&3 ; echo "bar" <&3 ; cat >&3 ) prints but hangs
+# ftst() ( f="$(mktemp)"; exec 3<>"$f"; rm "$f"; echo "foo" <&3 ; echo "bar" <&3 ; >&3 )  works?  but using backward syntax!
+# ftst() ( f="$(mktemp)"; exec 3<>"$f"; rm "$f"; echo "foo" >&3 ; echo "bar" >&3 ; >&3 )
+# ftst() ( f="$(mktemp)"; exec 3<>"$f"; rm "$f"; printf "foo\n" >&3 ; printf "bar\n" >&3 ; cat <&3 )
 
 cls() { clear ; }
 r()   { reset ; }
