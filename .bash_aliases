@@ -194,10 +194,15 @@ path() { echo "$PATH" | tr ':' '\n' ; }
 kdf() { df -hlT -xtmpfs -xdevtmpfs | ( sed -u 1q; sort -k 7,7 ) ; }  # cleaner and trivially adaptable to multiple header lines, but requires GNU(-compat) version of _external_ pgm (sed)  https://stackoverflow.com/a/56151840
 kdf() { df -hlT -xtmpfs -xdevtmpfs | ( IFS= read -r h; printf "%s\n" "$h"; sort -k 7,7 ) ; }  # uses only shell builtins, but more syntax  https://stackoverflow.com/a/27368739
 
-duh() ( f=$(mktemp) ; for dn in "$@" ; do du -x --max-depth=1 --human-readable    "$dn" | head -n -1 >>"$f" ; done ; <"$f" sort -r -h ; rm -f "$f" )
-duk() ( f=$(mktemp) ; for dn in "$@" ; do du -x --max-depth=1 --block-size=K -t1K "$dn" | head -n -1 >>"$f" ; done ; <"$f" sort -r -n ; rm -f "$f" )
-dum() ( f=$(mktemp) ; for dn in "$@" ; do du -x --max-depth=1 --block-size=M -t1M "$dn" | head -n -1 >>"$f" ; done ; <"$f" sort -r -n ; rm -f "$f" )
-dug() ( f=$(mktemp) ; for dn in "$@" ; do du -x --max-depth=1 --block-size=G -t1G "$dn" | head -n -1 >>"$f" ; done ; <"$f" sort -r -n ; rm -f "$f" )
+duh1_() ( du -x --max-depth=1 --human-readable    "$1" | head -n -1 ) # drop last line, sum of all, to simulate nonexistent --min-depth du option
+duk1_() ( du -x --max-depth=1 --block-size=K -t1K "$1" | head -n -1 ) # drop last line, sum of all, to simulate nonexistent --min-depth du option
+dum1_() ( du -x --max-depth=1 --block-size=M -t1M "$1" | head -n -1 ) # drop last line, sum of all, to simulate nonexistent --min-depth du option
+dug1_() ( du -x --max-depth=1 --block-size=G -t1G "$1" | head -n -1 ) # drop last line, sum of all, to simulate nonexistent --min-depth du option
+do_cmd_() ( c="$1" ; shift || return ; for d in "$@" ; do "$c" "$d" ; done )
+duh() ( do_cmd_ duh1_ "$@" | sort -r -h )
+duk() ( do_cmd_ duk1_ "$@" | sort -r -n )
+dum() ( do_cmd_ dum1_ "$@" | sort -r -n )
+dug() ( do_cmd_ dug1_ "$@" | sort -r -n )
 
 # https://unix.stackexchange.com/a/579536  but doesn't seem to work for me
 # f="$(mktemp)"; exec 3<"$f" 4>"$f"; rm "$f"; # ... use >&3 and <&4 instead of >"$f" or <"$f"
