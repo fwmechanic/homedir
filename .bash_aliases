@@ -19,8 +19,8 @@
      hgit() { git --git-dir="$HOME/.git-homedir/" --work-tree="$HOME" "$@" ; }  # leave this line UNcommented!
 # A: cd && git clone --bare git@github.com:fwmechanic/homedir.git .git-homedir && hgit config --local status.showUntrackedFiles no && hgit checkout
 # A: git config --global include.path "$HOME/gitconfig_global"
-#    # Ubuntu (& Windows) do not provide a default instance of ~/.bash_aliases
-# A: echo 'test -f ~/.bash_aliases && . ~/.bash_aliases' >> ~/.bashrc
+#    # Ubuntu (& Windows) MAY not provide a default instance of ~/.bash_aliases
+# A: ( ba='~/.bash_aliases' rc=~/.bashrc ; grep -qFi "$ba" "$rc" || echo 'test -f '"$ba"' && . '"$ba" >> "$rc" )
 # A: mkdir -p ~/my/repos && cd ~/my/repos && git clone git@github.com:fwmechanic/shell.git
 # W: mkdir -p ~/my/repos && cd ~/my/repos && git clone git@github.com:fwmechanic/winscripts.git
 # W: ~/my/repos/winscripts/winupdtuserpath  # to add certain ~/my/... dirs to $PATH

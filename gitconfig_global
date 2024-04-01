@@ -37,3 +37,6 @@
 	br = branch
 	brv = branch -vv
 	indexonly = stash save --keep-index --include-untracked
+	# alias to force-pull *overwrite* (i.e. obliterate local branch instance w/upstream branch); overrides "fatal: Not possible to fast-forward, aborting." condition
+	# https://stackoverflow.com/a/74319682 + https://mirrors.edge.kernel.org/pub/software/scm/git/docs/gitrevisions.html
+	pullover = reset --hard @{upstream}
