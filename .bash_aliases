@@ -72,6 +72,7 @@ case "$(uname -s)" in
 
    Linux)
       # echo 'Linux'
+      export SCANS=/mnt/remote/private_rw/scans
       catpath ~/my/repos/k_edit  # [ -d ~/my/repos/k_edit ]   && PATH=$PATH:~/my/repos/k_edit
       export INSTALL="$HOME"     # default autotools' `make install` to install built binaries to "$HOME/usr/local/bin" ...
       catpath "$INSTALL/usr/local/bin"  # ... and add this to PATH
@@ -96,6 +97,7 @@ case "$(uname -s)" in
 
    CYGWIN*|MINGW64*|MINGW32*|MSYS*)
       # echo 'MS Windows'
+      export SCANS=/r/scans
       # (Windows) installers for Strawberry Perl & FreePascal come with their own GCC (fine) and add the dir containing GCC to $PATH (annoying; assuming GCC is only
       # needed by their SW-internal processes (building), why not leave the buckets of "batteries included" .exes in a dir NOT in $PATH but relative to some public
       # entrypoint binary (e.g. perl.exe or fpc.exe)?)
